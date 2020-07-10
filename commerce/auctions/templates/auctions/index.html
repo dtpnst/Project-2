@@ -1,0 +1,13 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<h2>Active Listings</h2>
+
+<ul>
+    {% for listing in listings %}
+        <li>Item: {{ listing.title }} - Description: {{ listing.description }} currently sells at {{ listing.starting_bid }}</li>
+    {% endfor%}
+</ul>
+
+{% endblock %}
