@@ -70,7 +70,8 @@ class NewListingForm(forms.Form):
     title = forms.CharField(label="Title")
     description = forms.CharField(label="Description")
     starting_bid = forms.IntegerField()
-
+    img_url = forms.CharField(label="Image_URL", required=False)
+    
 
 def create(request):
     if request.method == "POST":
@@ -79,8 +80,9 @@ def create(request):
             title = form.cleaned_data["title"]
             description = form.cleaned_data["description"]
             starting_bid = form.cleaned_data["starting_bid"]
+            img_url = form.cleaned_data["img_url"]
 
-            listing = Auction_Listings(title=title, description=description, starting_bid=starting_bid)
+            listing = Auction_Listings(title=title, description=description, starting_bid=starting_bid, img_url=img_url)
             listing.save()
 
     return render(request, "auctions/create.html", {

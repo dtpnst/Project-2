@@ -6,7 +6,7 @@
 
 <ul>
     {% for listing in listings %}
-        <li>Item: {{ listing.title }} - Description: {{ listing.description }} currently sells at {{ listing.starting_bid }}</li>
+        <li>Item: {{ listing.title }} - Description: {{ listing.description }} currently sells at {{ listing.starting_bid }} image: <img src="{{listing.img_url}}"></li>
     {% endfor%}
 </ul>
 
