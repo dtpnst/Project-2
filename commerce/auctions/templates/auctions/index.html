@@ -6,7 +6,7 @@
 
 <ul>
     {% for listing in listings %}
-        <li>Item: {{ listing.title }} - Description: {{ listing.description }} currently sells at {{ listing.starting_bid }} image: <img src="{{listing.img_url}}"></li>
+        <li><a href="{% url 'listing' listing.id %}">Item: {{ listing.title }}</a> - Description: {{ listing.description }} currently sells at {{ listing.starting_bid }} image: <img src="{{listing.img_url}}"> and Category: {{ listing.category }}</li>
     {% endfor%}
 </ul>
 
