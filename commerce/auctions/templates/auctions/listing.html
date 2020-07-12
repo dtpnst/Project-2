@@ -1,5 +1,67 @@
 {% extends "auctions/layout.html" %}
 
+{% debug %}
+
 {% block body %}
-    Current price for {{ listing.title }}: {{ listing.starting_bid}}
+    {{ listing.title }}
+    Description: {{ listing.description }}
+    Category: {{ listing.category }}
+    Current price: {{minBid}}
+    Image: <img src="{{listing.img_url}}">
+
+    {% if user.is_authenticated %}
+
+        {% if not isClose %}
+
+        <form action="{% url 'watchlist' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="listing_id" value="{{listing.id}}" />
+            {% if inWatchList %}
+            <button>Remove from Watchlist</button>
+            {% else %}
+            <button>Add to Watchlist</button>
+            {% endif %}
+        </form>
+
+        <form action="{% url 'makeBid' listing.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="listing_id" value="{{listing.id}}" />
+            <label for="bid_amount">Bid Amount: $</label>
+            <input type="number" min="{{minBid}}" name="bid_amount" id="bid_amount" />
+            <button>Place Bid</button>
+        </form>
+
+        <form action="{% url 'closeAuction' listing.id %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="listing_id" value="{{listing.id}}">
+            {% if isSeller %}
+            <button>Close Auction</button>
+            {% endif %}
+        </form>
+
+        {% endif %}
+
+        {% if isClose %}
+
+            Auction has ended! 
+
+            {% if listing.current_bid %}
+
+            Winning bid: {{ listing.current_bid.user_bid }}
+            Winning User: {{ listing.current_bid.user.username }}
+
+            {% endif %}
+
+            {% if user == listing.current_bid.user %}
+
+                You Won!
+
+            {% endif %}
+
+        {% endif %}
+
+    {% else %}
+
+    {% endif %}
+
 {% endblock %}
