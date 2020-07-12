@@ -1,31 +1,42 @@
 {% extends "auctions/layout.html" %}
-
 {% block body %}
 
 <h2>Active Listings</h2>
-
 <ul>
     {% for listing in listings %}
-
         {% if listing.active %}
-
-        <li>
-            <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
-            Description: {{ listing.description }} currently sells at {{ listing.starting_bid }}
-            Category: {{ listing.category }}</li>
-
+            <li>
+                <div id="listing">
+                    <div class="row">
+                        <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
+                    </div>
+                    <div class="row">
+                        Description: {{ listing.description }} currently sells at {{ listing.starting_bid }}
+                    </div>
+                    <div class="row">
+                        Category: {{ listing.category }}
+                    </div>
+                </div>
+            </li>
         {% endif %}
-    {% endfor%}
+    {% endfor %}
 </ul>
 
 <h2>Closed Listings</h2>
-
 <ul>
     {% for listing in listings %}
-
         {% if not listing.active %}
-
-        <li><a href="{% url 'listing' listing.id %}">Item: {{ listing.title }}</a> - Description: {{ listing.description }} currently sells at {{ listing.starting_bid }} image: <img src="{{listing.img_url}}"> and Category: {{ listing.category }}</li>
+        <li>
+            <div class="row">
+                <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
+            </div>
+            <div class="row">
+                Description: {{ listing.description }} sold for {{ listing.current_bid.user_bid }}
+            </div>
+            <div class="row">
+                Category: {{ listing.category }}
+            </div>
+        </li>
 
         {% endif %}
     {% endfor%}

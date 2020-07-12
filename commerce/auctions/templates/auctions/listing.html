@@ -1,67 +1,81 @@
 {% extends "auctions/layout.html" %}
-
 {% debug %}
-
 {% block body %}
-    {{ listing.title }}
-    Description: {{ listing.description }}
-    Category: {{ listing.category }}
-    Current price: {{minBid}}
-    Image: <img src="{{listing.img_url}}">
 
+    <div class="row">
+        {{ listing.title }}
+    </div>
+    <div class="row">
+        Description: {{ listing.description }}
+    </div>
+    <div class="row">
+        Category: {{ listing.category }}
+    </div>
+    <div class="row">
+        Current price: {{minBid}}
+    </div>
+    <div class="row" id="listing_image">
+        Image: <img src="{{listing.img_url}}">
+    </div>
+    
     {% if user.is_authenticated %}
 
         {% if not isClose %}
+            <div class="row">
+                <form action="{% url 'makeBid' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="listing_id" value="{{listing.id}}" />
+                    <label for="bid_amount">Bid Amount: $</label>
+                    <input type="number" min="{{minBid}}" name="bid_amount" id="bid_amount" />
+                    <button>Place Bid</button>
+                </form>
+            </div>
 
-        <form action="{% url 'watchlist' %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="listing_id" value="{{listing.id}}" />
-            {% if inWatchList %}
-            <button>Remove from Watchlist</button>
-            {% else %}
-            <button>Add to Watchlist</button>
-            {% endif %}
-        </form>
+            <div class="row">
+                <form action="{% url 'watchlist' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="listing_id" value="{{listing.id}}" />
+                    {% if inWatchList %}
+                    <button>Remove from Watchlist</button>
+                    {% else %}
+                    <button>Add to Watchlist</button>
+                    {% endif %}
+                </form>
+            </div>
 
-        <form action="{% url 'makeBid' listing.id %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="listing_id" value="{{listing.id}}" />
-            <label for="bid_amount">Bid Amount: $</label>
-            <input type="number" min="{{minBid}}" name="bid_amount" id="bid_amount" />
-            <button>Place Bid</button>
-        </form>
-
-        <form action="{% url 'closeAuction' listing.id %}" method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="listing_id" value="{{listing.id}}">
-            {% if isSeller %}
-            <button>Close Auction</button>
-            {% endif %}
-        </form>
-
+            <div class="row">
+                <form action="{% url 'closeAuction' listing.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="listing_id" value="{{listing.id}}">
+                    {% if isSeller %}
+                    <button>Close Auction</button>
+                    {% endif %}
+                </form>
+            </div>
         {% endif %}
 
         {% if isClose %}
-
-            Auction has ended! 
+            <div class="row">
+                <h1>Auction for {{ listing.title }} has ended.</h1>
+            </div>
 
             {% if listing.current_bid %}
-
-            Winning bid: {{ listing.current_bid.user_bid }}
-            Winning User: {{ listing.current_bid.user.username }}
-
+                <div class="row">
+                    <h5>Winning bid: {{ listing.current_bid.user_bid }}</h5>
+                </div>
+                <div class="row">
+                    <h5>Winning User: {{ listing.current_bid.user.username }}</h5>
+                </div>
             {% endif %}
 
             {% if user == listing.current_bid.user %}
-
-                You Won!
-
+                <div class="row">
+                    <h1>Congratulations! You've won the {{ listing.title }} </h1>
+                </div>
             {% endif %}
-
         {% endif %}
-
     {% else %}
-
+        PLEASE LOG IN TO VIEW LISTING.
     {% endif %}
 
 {% endblock %}
