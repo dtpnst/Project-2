@@ -23,12 +23,16 @@ class Auction_Listing(models.Model):
         null=True
     )
     active = models.BooleanField(default=True)
+
     def __str__(self):
-        return f"Title: {self.title} and Description: {self.description} and Starting Bid: {self.starting_bid} and Category: {self.listing_category.name}"
+        return f"Title: {self.title} and Description: {self.description} and "
+        + "Starting Bid: {self.starting_bid} and Category: "
+        + "{self.listing_category.name}"
 
 
 class User(AbstractUser):
-    watchlist = models.ManyToManyField(Auction_Listing, blank=True, related_name="watching")
+    watchlist = models.ManyToManyField(Auction_Listing, blank=True,
+                                       related_name="watching")
 
 
 class Bid(models.Model):
@@ -53,7 +57,9 @@ class Comment(models.Model):
         null=True
     )
 
+
 class Category(models.Model):
     name = models.CharField(max_length=32)
+
     def __str__(self):
         return f"{self.name}"

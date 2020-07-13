@@ -1,6 +1,11 @@
 {% extends "auctions/layout.html" %}
+
 {% block body %}
-<h3>{{category_name}} Listings</h3>
+
+<h3>
+    {{category_name}} Listings
+</h3>
+
 <ul>
     {% for listing in listings %}
         {% if listing.active %}
@@ -28,7 +33,6 @@
                         Current Price: ${{listing.starting_bid}}
                         {% endif %}
                     </div>
-                    
                 </div>
             </li>
         {% endif %}

@@ -1,15 +1,16 @@
 {% extends "auctions/layout.html" %}
+
 {% block body %}
     
     <div class="row">
-        Welcome to Create New Listing Page
+        <h2>Create New Auction</h2>
     </div>
-
+    
     <div class="row">
         <form action="{% url 'create' %}" method="post">
             {% csrf_token %}
             {{ form.as_ul }}
-        <input type="submit" value="OK">
+        <input type="submit" value="Create">
         </form>
     </div>
     

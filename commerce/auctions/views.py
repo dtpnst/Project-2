@@ -7,22 +7,28 @@ from django.urls import reverse
 from decimal import Decimal
 from .models import User, Auction_Listing, Bid, Comment, Category
 
+
 class NewListingForm(forms.Form):
     title = forms.CharField(label="Title")
     description = forms.CharField(label="Description")
     starting_bid = forms.DecimalField()
     img_url = forms.CharField(label="Image_URL (optional)", required=False)
-    category = forms.ModelChoiceField(label="Category", queryset=Category.objects.all())
+    category = forms.ModelChoiceField(label="Category",
+                                      queryset=Category.objects.all())
+
 
 class AddToWatchListForm(forms.Form):
     listing_id = forms.CharField(label="Listing Id")
+
 
 class NewBidForm(forms.Form):
     listing_id = forms.CharField(label="Listing Id")
     bid_amount = forms.DecimalField()
 
+
 class CloseAuctionForm(forms.Form):
     listing_id = forms.CharField(label="listing Id")
+
 
 class NewCommentForm(forms.Form):
     listing_id = forms.CharField(label="Listing Id")
@@ -101,8 +107,8 @@ def create(request):
 
             # Add new listing to DB
             listing = Auction_Listing(
-                title=title, description=description, 
-                starting_bid=starting_bid, img_url=img_url, 
+                title=title, description=description,
+                starting_bid=starting_bid, img_url=img_url,
                 listing_category=category, seller=request.user)
             listing.save()
 
@@ -126,8 +132,8 @@ def listing(request, listing_id):
         isClose = True
 
     # Get Listing Comments
-    comments = Comment.objects.filter(auction_listing__id = listing_id)
-    
+    comments = Comment.objects.filter(auction_listing__id=listing_id)
+
     # Get current bid amount
     if listing.current_bid:
         minBid = listing.current_bid.user_bid
@@ -138,11 +144,10 @@ def listing(request, listing_id):
         # Check if item is in User's watchlist
         if listing in user.watchlist.all():
             inWatchList = True
-        
+
         # Check if logged in user is the owner
         if user == listing.seller:
             isSeller = True
-    
 
     return render(request, "auctions/listing.html", {
         "listing": listing,
@@ -188,7 +193,7 @@ def makeBid(request):
             if bid_amount > listing.starting_bid:
                 bid = Bid(user=user, user_bid=bid_amount)
                 bid.save()
-                
+
                 listing.current_bid = bid
                 listing.save()
 
@@ -206,13 +211,11 @@ def closeAuction(request):
             if request.user == listing.seller:
                 listing.active = False
                 listing.save()
-            
-            return redirect('listing', listing_id=listing_id)
 
+            return redirect('listing', listing_id=listing_id)
 
     return render(request, "auctions/error.html")
 
-    
 
 def addComment(request):
     if request.method == "POST":
@@ -222,21 +225,21 @@ def addComment(request):
             user = request.user
             listing = Auction_Listing.objects.get(id=listing_id)
             comment_text = form.cleaned_data["comment_text"]
-            
-            comment = Comment(user=user, auction_listing=listing, user_comment=comment_text) 
+
+            comment = Comment(user=user, auction_listing=listing,
+                              user_comment=comment_text)
             comment.save()
 
             return redirect('listing', listing_id=listing_id)
 
-        
     return render(request, "auctions/error.html")
 
-    
 
 def categories(request):
     return render(request, "auctions/categories.html", {
         "categories": Category.objects.all()
     })
+
 
 def categorylisting(request, category_id):
     category = Category.objects.get(id=category_id)
