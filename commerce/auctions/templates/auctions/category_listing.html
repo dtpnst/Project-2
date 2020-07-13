@@ -1,17 +1,16 @@
 {% extends "auctions/layout.html" %}
 {% block body %}
-
-<h2>Active Listings</h2>
+<h3>{{category_name}} Listings</h3>
 <ul>
     {% for listing in listings %}
         {% if listing.active %}
             <li>
                 <div id="listing">
                     <div class="row">
-                        <h5><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h5>
+                        <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
                     </div>
                     <div class="row">
-                        Category:&nbsp;<a href="{% url 'categorylisting' listing.listing_category.id %}">{{listing.listing_category.name}}</a>
+                        Category: {{ listing.listing_category.name }}
                     </div>
                     <div class="row">
                         Description: {{ listing.description }}
@@ -34,26 +33,6 @@
             </li>
         {% endif %}
     {% endfor %}
-</ul>
-
-<h2>Closed Listings</h2>
-<ul>
-    {% for listing in listings %}
-        {% if not listing.active %}
-        <li>
-            <div class="row">
-                <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
-            </div>
-            <div class="row">
-                Description: {{ listing.description }} sold for {{ listing.current_bid.user_bid }}
-            </div>
-            <div class="row">
-                Category: {{ listing.category }}
-            </div>
-        </li>
-
-        {% endif %}
-    {% endfor%}
 </ul>
 
 {% endblock %}

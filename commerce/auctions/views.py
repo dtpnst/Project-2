@@ -4,25 +4,29 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django import forms
 from django.urls import reverse
-
-from .models import User, Auction_Listing, Bid
+from decimal import Decimal
+from .models import User, Auction_Listing, Bid, Comment, Category
 
 class NewListingForm(forms.Form):
     title = forms.CharField(label="Title")
     description = forms.CharField(label="Description")
-    starting_bid = forms.IntegerField()
+    starting_bid = forms.DecimalField()
     img_url = forms.CharField(label="Image_URL (optional)", required=False)
-    category = forms.CharField(label="Category (optional)", required=False)
+    category = forms.ModelChoiceField(label="Category", queryset=Category.objects.all())
 
 class AddToWatchListForm(forms.Form):
     listing_id = forms.CharField(label="Listing Id")
 
 class NewBidForm(forms.Form):
     listing_id = forms.CharField(label="Listing Id")
-    bid_amount = forms.IntegerField()
+    bid_amount = forms.DecimalField()
 
 class CloseAuctionForm(forms.Form):
     listing_id = forms.CharField(label="listing Id")
+
+class NewCommentForm(forms.Form):
+    listing_id = forms.CharField(label="Listing Id")
+    comment_text = forms.CharField()
 
 
 def index(request):
@@ -99,8 +103,10 @@ def create(request):
             listing = Auction_Listing(
                 title=title, description=description, 
                 starting_bid=starting_bid, img_url=img_url, 
-                category=category, seller=request.user)
+                listing_category=category, seller=request.user)
             listing.save()
+
+            return redirect('listing', listing_id=listing.id)
 
     return render(request, "auctions/create.html", {
         "form": NewListingForm()
@@ -111,31 +117,41 @@ def listing(request, listing_id):
     listing = Auction_Listing.objects.get(id=listing_id)
     user = request.user
     inWatchList = False
-
-    # Check if item is in User's watchlist
-    if listing in user.watchlist.all():
-        inWatchList = True
-    
     minBid = listing.starting_bid
-    # Add comment here
-    if listing.current_bid:
-        minBid = listing.current_bid.user_bid
-
+    currentBid = listing.starting_bid
     isSeller = False
-    # Check if logged in user is the owner
-    if user == listing.seller:
-        isSeller = True
 
     isClose = False
     if not listing.active:
         isClose = True
 
+    # Get Listing Comments
+    comments = Comment.objects.filter(auction_listing__id = listing_id)
+    
+    # Get current bid amount
+    if listing.current_bid:
+        minBid = listing.current_bid.user_bid
+        currentBid = listing.current_bid.user_bid
+    minBid = minBid + Decimal(".01")
+
+    if user.is_authenticated:
+        # Check if item is in User's watchlist
+        if listing in user.watchlist.all():
+            inWatchList = True
+        
+        # Check if logged in user is the owner
+        if user == listing.seller:
+            isSeller = True
+    
+
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "inWatchList": inWatchList,
         "minBid": minBid,
+        "currentBid": currentBid,
         "isSeller": isSeller,
-        "isClose": isClose
+        "isClose": isClose,
+        "comments": comments
     })
 
 
@@ -159,7 +175,7 @@ def watchlist(request):
     })
 
 
-def makeBid(request, listing_id):
+def makeBid(request):
     if request.method == "POST":
         form = NewBidForm(request.POST)
         if form.is_valid():
@@ -176,10 +192,11 @@ def makeBid(request, listing_id):
                 listing.current_bid = bid
                 listing.save()
 
-    return redirect('listing', listing_id=listing_id)
+            return redirect('listing', listing_id=listing_id)
+    return render(request, "auctions/error.html")
 
 
-def closeAuction(request, listing_id):
+def closeAuction(request):
     if request.method == "POST":
         form = CloseAuctionForm(request.POST)
         if form.is_valid():
@@ -189,11 +206,43 @@ def closeAuction(request, listing_id):
             if request.user == listing.seller:
                 listing.active = False
                 listing.save()
+            
+            return redirect('listing', listing_id=listing_id)
 
-            else:
-                return render(request, "auctions/error.html")
 
-    return redirect('listing', listing_id=listing_id)
+    return render(request, "auctions/error.html")
+
+    
+
+def addComment(request):
+    if request.method == "POST":
+        form = NewCommentForm(request.POST)
+        if form.is_valid():
+            listing_id = form.cleaned_data["listing_id"]
+            user = request.user
+            listing = Auction_Listing.objects.get(id=listing_id)
+            comment_text = form.cleaned_data["comment_text"]
+            
+            comment = Comment(user=user, auction_listing=listing, user_comment=comment_text) 
+            comment.save()
+
+            return redirect('listing', listing_id=listing_id)
+
+        
+    return render(request, "auctions/error.html")
+
+    
 
 def categories(request):
-    return render(request, "auctions/categories.html")
+    return render(request, "auctions/categories.html", {
+        "categories": Category.objects.all()
+    })
+
+def categorylisting(request, category_id):
+    category = Category.objects.get(id=category_id)
+    listings = Auction_Listing.objects.filter(listing_category=category)
+
+    return render(request, "auctions/category_listing.html", {
+        "listings": listings,
+        "category_name": category.name
+    })

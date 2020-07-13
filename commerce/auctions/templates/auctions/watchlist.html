@@ -1,10 +1,22 @@
 {% extends "auctions/layout.html" %}
-
 {% block body %}
-    Items on your watchlist
-    <ul>
-        {% for listing in watchlist %}
-            <li><a href="{% url 'listing' listing.id %}">Item: {{ listing.title }}</a> - Description: {{ listing.description }} currently sells at {{ listing.starting_bid }} image: <img src="{{listing.img_url}}"> and Category: {{ listing.category }}</li>
-        {% endfor%}
-    </ul>
+
+    <div class="row">
+        <h3>
+            Items on your watchlist:
+        </h3>
+    </div>
+    
+    <div class="row">
+        <ul>
+            {% for listing in watchlist %}
+                <li><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
+                    Description: {{ listing.description }}
+                    Category: {{ listing.category }} 
+                    Current Price: {{ listing.starting_bid }}
+                    Image: <img src="{{listing.img_url}}"></li>
+            {% endfor%}
+        </ul>
+    </div>
+
 {% endblock %}
